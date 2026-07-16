@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { buildApp } from "./app.js";
+import type { PushSender } from "./push/service.js";
 import type { PushSubscription } from "./subscriptions/schema.js";
 import type { StoredSubscription, SubscriptionStore } from "./subscriptions/store.js";
 import type { TablesLookup } from "./tables/service.js";
@@ -69,6 +70,29 @@ describe("POST /call", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ ok: true });
+  });
+
+  it("fans the call out via the push sender for a known, active table", async () => {
+    const pushSender: PushSender = { sendToAll: vi.fn().mockResolvedValue(undefined) };
+    const app = buildApp({ tablesStore: fakeTablesStore(), pushSender });
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/call",
+      payload: { tableCode: "2-05" },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(pushSender.sendToAll).toHaveBeenCalledWith(activeTable);
+  });
+
+  it("does not fan out for an unknown table code", async () => {
+    const pushSender: PushSender = { sendToAll: vi.fn().mockResolvedValue(undefined) };
+    const app = buildApp({ tablesStore: fakeTablesStore(), pushSender });
+
+    await app.inject({ method: "POST", url: "/call", payload: { tableCode: "9-99" } });
+
+    expect(pushSender.sendToAll).not.toHaveBeenCalled();
   });
 
   it("returns 404 for an unknown table code", async () => {
