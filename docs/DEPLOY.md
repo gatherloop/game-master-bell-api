@@ -173,8 +173,9 @@ git pull
 docker compose up -d --build
 ```
 
-## What's not covered yet
+## Next steps
 
-Uptime monitoring wired to `GET /healthz` and the passcode rotation
-procedure land in phase A5 (decommission & runbook), once the rest of the
-API surface exists.
+Once the API is deployed and verified end to end, see
+[RUNBOOK.md](RUNBOOK.md) for the phase A5 operational work: the Firebase
+project decommission checklist, wiring up uptime monitoring for
+`GET /healthz`, and the staff passcode rotation procedure.
