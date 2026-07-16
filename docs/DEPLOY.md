@@ -22,6 +22,10 @@ cp .env.example .env
 # edit .env with production values as later phases add config
 ```
 
+`TABLES_CACHE_PATH` defaults to `./data/tables-cache.json`; `docker-compose.yml`
+mounts a named volume at `/app/data` so the on-disk cache of table codes
+survives container restarts and redeploys.
+
 ## 2. Run the API container
 
 The container binds to `127.0.0.1:3000` only — it is never exposed directly
