@@ -19,12 +19,23 @@ proxy — not the Node process — holds the certificate.
 git clone https://github.com/gatherloop/game-master-bell-api.git
 cd game-master-bell-api
 cp .env.example .env
-# edit .env with production values as later phases add config
 ```
 
-`TABLES_CACHE_PATH` defaults to `./data/tables-cache.json`; `docker-compose.yml`
-mounts a named volume at `/app/data` so the on-disk cache of table codes
-survives container restarts and redeploys.
+Fill in `.env` with production values:
+
+- `STAFF_PASSCODE` — a shared secret staff enter in the receiver PWA
+  (e.g. `openssl rand -hex 16`). Required — subscription endpoints reject
+  everything with 401 until this is set.
+- `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` — generate a pair with
+  `pnpm install && pnpm run vapid:generate` and paste both values in.
+  `VAPID_PUBLIC_KEY` is required for `GET /vapid-key` to serve anything;
+  `VAPID_PRIVATE_KEY` is unused until phase A4 wires up the real push send,
+  but generate and store both together now so they aren't lost.
+
+`TABLES_CACHE_PATH` and `SUBSCRIPTIONS_DB_PATH` default to `./data/tables-cache.json`
+and `./data/subscriptions.db`; `docker-compose.yml` mounts a named volume at
+`/app/data` so the on-disk tables cache and the subscriptions database
+survive container restarts and redeploys.
 
 ## 2. Run the API container
 
@@ -95,6 +106,21 @@ curl https://bell-api.gatherloop.id/healthz
 ```
 
 This is the demoable outcome for phase A1.
+
+Phase A3's demoable outcome — a subscription posted with `curl` lands in the
+database, and a wrong passcode is rejected:
+
+```bash
+curl -i https://bell-api.gatherloop.id/subscriptions \
+  -X POST -H "Content-Type: application/json" \
+  -d '{"subscription":{"endpoint":"https://example/test","keys":{"p256dh":"x","auth":"y"}},"passcode":"wrong"}'
+# HTTP/1.1 401 Unauthorized
+
+curl -i https://bell-api.gatherloop.id/subscriptions \
+  -X POST -H "Content-Type: application/json" \
+  -d '{"subscription":{"endpoint":"https://example/test","keys":{"p256dh":"x","auth":"y"}},"passcode":"<your STAFF_PASSCODE>"}'
+# HTTP/1.1 200 OK  {"ok":true}
+```
 
 ## Redeploying
 
