@@ -6,13 +6,16 @@ It replaces the v1 Firebase Cloud Function: validates bell calls from the
 bell web app and fans them out as Web Push notifications to game master
 devices, with no Google/Firebase dependency.
 
-Status: **Phase A4** (Web Push fan-out) — a valid call now fans out a real
-Web Push notification to every stored subscription concurrently; per-send
-outcomes are logged, and any subscription whose send fails with 404/410 is
-pruned automatically. Table codes are validated against the bell repo's
-`tables.json`, synced at startup and refreshed hourly. Game master devices
-register/unregister a Web Push subscription (SQLite-backed, passcode-gated),
-and the API's VAPID public key is served for the receiver PWA to use.
+Status: **Phase A5** (decommission & runbook) — the API track is complete.
+A valid call fans out a real Web Push notification to every stored
+subscription concurrently; per-send outcomes are logged, and any
+subscription whose send fails with 404/410 is pruned automatically. Table
+codes are validated against the bell repo's `tables.json`, synced at startup
+and refreshed hourly. Game master devices register/unregister a Web Push
+subscription (SQLite-backed, passcode-gated), and the API's VAPID public key
+is served for the receiver PWA to use. See
+[docs/RUNBOOK.md](docs/RUNBOOK.md) for the Firebase decommission checklist,
+uptime monitoring setup, and the staff passcode rotation procedure.
 
 ## Stack
 
@@ -70,3 +73,9 @@ tables refresh after startup just keeps the last good copy.
 
 See [docs/DEPLOY.md](docs/DEPLOY.md) for running the API on the VPS via
 Docker Compose behind a TLS-terminating reverse proxy.
+
+## Operations
+
+See [docs/RUNBOOK.md](docs/RUNBOOK.md) for the Firebase project
+decommission checklist, wiring up uptime monitoring for `GET /healthz`, and
+the staff passcode rotation procedure.
