@@ -28,9 +28,10 @@ Fill in `.env` with production values:
   everything with 401 until this is set.
 - `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` — generate a pair with
   `pnpm install && pnpm run vapid:generate` and paste both values in.
-  `VAPID_PUBLIC_KEY` is required for `GET /vapid-key` to serve anything;
-  `VAPID_PRIVATE_KEY` is unused until phase A4 wires up the real push send,
-  but generate and store both together now so they aren't lost.
+  `VAPID_PUBLIC_KEY` is served at `GET /vapid-key`; `VAPID_PRIVATE_KEY` signs
+  every outgoing Web Push message and must stay secret.
+- `VAPID_SUBJECT` — a `mailto:` address or `https:` URL push services may use
+  to contact us about this key pair, per the VAPID spec.
 
 `TABLES_CACHE_PATH` and `SUBSCRIPTIONS_DB_PATH` default to `./data/tables-cache.json`
 and `./data/subscriptions.db`; `docker-compose.yml` mounts a named volume at
@@ -121,6 +122,49 @@ curl -i https://bell-api.gatherloop.id/subscriptions \
   -d '{"subscription":{"endpoint":"https://example/test","keys":{"p256dh":"x","auth":"y"}},"passcode":"<your STAFF_PASSCODE>"}'
 # HTTP/1.1 200 OK  {"ok":true}
 ```
+
+Phase A4's demoable outcome — `curl /call` rings a real browser subscribed
+by hand via devtools (no receiver PWA needed yet):
+
+1. On a phone or desktop browser, open any HTTPS page and run in devtools:
+
+   ```js
+   const swSource = `
+     self.addEventListener("push", (event) => {
+       const { title, body } = event.data.json();
+       event.waitUntil(self.registration.showNotification(title, { body }));
+     });
+   `;
+   const swUrl = URL.createObjectURL(new Blob([swSource], { type: "text/javascript" }));
+   const registration = await navigator.serviceWorker.register(swUrl);
+   const subscription = await registration.pushManager.subscribe({
+     userVisibleOnly: true,
+     applicationServerKey: "<VAPID_PUBLIC_KEY>",
+   });
+   console.log(JSON.stringify(subscription.toJSON()));
+   ```
+
+2. Register that subscription with the API:
+
+   ```bash
+   curl -i https://bell-api.gatherloop.id/subscriptions \
+     -X POST -H "Content-Type: application/json" \
+     -d '{"subscription": <output of sub.toJSON()>, "passcode": "<your STAFF_PASSCODE>"}'
+   # HTTP/1.1 200 OK  {"ok":true}
+   ```
+
+3. Trigger a call for a real table code and watch the notification appear:
+
+   ```bash
+   curl -i https://bell-api.gatherloop.id/call \
+     -X POST -H "Content-Type: application/json" \
+     -d '{"tableCode":"2-05"}'
+   # HTTP/1.1 200 OK  {"ok":true}
+   ```
+
+Check the container logs (`docker compose logs -f`) for the per-subscription
+`push.send_result` line, and `push.pruned` if a stale subscription gets
+cleaned up.
 
 ## Redeploying
 

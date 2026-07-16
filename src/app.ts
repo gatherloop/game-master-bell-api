@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import { CallRequestSchema } from "./call/schema.js";
+import type { PushSender } from "./push/service.js";
 import { isValidPasscode } from "./subscriptions/auth.js";
 import { SubscribeRequestSchema, UnsubscribeRequestSchema } from "./subscriptions/schema.js";
 import type { SubscriptionStore } from "./subscriptions/store.js";
@@ -10,6 +11,7 @@ export interface BuildAppOptions {
   subscriptionStore?: SubscriptionStore;
   staffPasscode?: string;
   vapidPublicKey?: string;
+  pushSender?: PushSender;
 }
 
 const emptyTablesStore: TablesLookup = {
@@ -22,11 +24,16 @@ const emptySubscriptionStore: SubscriptionStore = {
   all: () => [],
 };
 
+const noopPushSender: PushSender = {
+  sendToAll: async () => {},
+};
+
 export function buildApp({
   tablesStore = emptyTablesStore,
   subscriptionStore = emptySubscriptionStore,
   staffPasscode,
   vapidPublicKey,
+  pushSender = noopPushSender,
 }: BuildAppOptions = {}): FastifyInstance {
   const app = Fastify({ logger: true });
 
@@ -89,16 +96,8 @@ export function buildApp({
       return reply.status(404).send({ error: "Unknown table" });
     }
 
-    // Push fan-out lands in phase A4; stub it as a log line for now (FR-A2).
-    app.log.info(
-      {
-        tableCode: table.code,
-        floor: table.floor,
-        number: table.number,
-        calledAt: new Date().toISOString(),
-      },
-      "call.push_stubbed",
-    );
+    app.log.info({ tableCode: table.code }, "call.received");
+    await pushSender.sendToAll(table);
     return reply.status(200).send({ ok: true });
   });
 

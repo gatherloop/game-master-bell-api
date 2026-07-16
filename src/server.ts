@@ -1,5 +1,6 @@
 import pino from "pino";
 import { buildApp } from "./app.js";
+import { WebPushSender } from "./push/service.js";
 import { SqliteSubscriptionStore } from "./subscriptions/store.js";
 import { TablesService } from "./tables/service.js";
 
@@ -25,6 +26,8 @@ const bootstrapLogger = pino();
 async function main() {
   const staffPasscode = requireEnv("STAFF_PASSCODE");
   const vapidPublicKey = requireEnv("VAPID_PUBLIC_KEY");
+  const vapidPrivateKey = requireEnv("VAPID_PRIVATE_KEY");
+  const vapidSubject = requireEnv("VAPID_SUBJECT");
 
   const tablesService = await TablesService.start({
     url: tablesUrl,
@@ -35,11 +38,18 @@ async function main() {
 
   const subscriptionStore = new SqliteSubscriptionStore(subscriptionsDbPath);
 
+  const pushSender = new WebPushSender({
+    vapid: { publicKey: vapidPublicKey, privateKey: vapidPrivateKey, subject: vapidSubject },
+    subscriptionStore,
+    logger: bootstrapLogger,
+  });
+
   const app = buildApp({
     tablesStore: tablesService,
     subscriptionStore,
     staffPasscode,
     vapidPublicKey,
+    pushSender,
   });
 
   await app.listen({ port, host });
