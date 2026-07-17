@@ -1,0 +1,14 @@
+[Unit]
+Description=Game Master Bell API
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/game-master-bell-api
+EnvironmentFile=%h/game-master-bell-api/.env
+ExecStart=/usr/bin/node dist/server.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

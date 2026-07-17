@@ -173,6 +173,14 @@ git pull
 docker compose up -d --build
 ```
 
+## Lightweight VPS? Skip Docker
+
+If the VPS is too small for Docker's daemon overhead to be worth it (e.g.
+512MB RAM or less) run the API directly with Node + systemd instead — see
+[docs/DEPLOY_NATIVE.md](DEPLOY_NATIVE.md). Same reverse proxy config
+either way, since the app always listens on `127.0.0.1:3000`.
+`.github/workflows/deploy.yml` automates the native path.
+
 ## Next steps
 
 Once the API is deployed and verified end to end, see
