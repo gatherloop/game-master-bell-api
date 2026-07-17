@@ -52,4 +52,8 @@ jobs:
             pnpm install --frozen-lockfile
             pnpm build
             pnpm prune --prod
+            mkdir -p ~/.config/systemd/user
+            cp deploy/game-master-bell-api.service ~/.config/systemd/user/
+            systemctl --user daemon-reload
+            systemctl --user enable game-master-bell-api
             systemctl --user restart game-master-bell-api
