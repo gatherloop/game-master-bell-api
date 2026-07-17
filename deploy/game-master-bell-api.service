@@ -4,9 +4,9 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=%h/game-master-bell-api
-EnvironmentFile=%h/game-master-bell-api/.env
-ExecStart=/usr/bin/node dist/server.js
+WorkingDirectory=/root/projects/game-master-bell-api
+EnvironmentFile=/root/projects/game-master-bell-api/.env
+ExecStart=/bin/bash -c 'export NVM_DIR=/root/.nvm; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"; nvm use; exec node dist/server.js'
 Restart=always
 RestartSec=5
 
