@@ -173,61 +173,13 @@ git pull
 docker compose up -d --build
 ```
 
-## Automated deploys via GitHub Actions
+## Lightweight VPS? Skip Docker
 
-`.github/workflows/deploy.yml` runs lint/typecheck/test/build on every push,
-then on `main` SSHes into the VPS and re-runs the same two commands as a
-manual redeploy (`git reset --hard origin/main` then
-`docker compose up -d --build`). It also (re)writes the VPS's `.env` from
-GitHub secrets on every deploy, so rotating a secret and re-running the
-workflow is enough to roll it out.
-
-### One-time VPS prep
-
-1. Complete steps 1–3 above once by hand (clone the repo, fill in the
-   initial `.env`, get the reverse proxy running) so there's a working
-   directory for the workflow to update.
-2. Create a dedicated deploy user (or reuse the one you used above) that
-   can run `git` and `docker compose` in that directory without a password
-   prompt (add it to the `docker` group: `usermod -aG docker <user>`).
-3. Generate a dedicated SSH key pair for GitHub Actions and add the
-   **public** key to that user's `~/.ssh/authorized_keys` on the VPS:
-
-   ```bash
-   ssh-keygen -t ed25519 -f deploy_key -C "github-actions" -N ""
-   ```
-
-4. Keep the **private** key (`deploy_key`) for the `VPS_SSH_KEY` secret
-   below — never commit it.
-
-### Repo secrets
-
-Add these under the repo's **Settings → Secrets and variables → Actions**
-(create a `production` environment first if you want the extra approval
-gate that `environment: production` in the workflow enables):
-
-| Secret               | Value                                                          |
-| -------------------- | --------------------------------------------------------------- |
-| `VPS_HOST`           | VPS IP or hostname                                             |
-| `VPS_PORT`           | SSH port (usually `22`)                                        |
-| `VPS_USERNAME`       | The deploy user created above                                  |
-| `VPS_SSH_KEY`        | The **private** key from step 3 (paste the whole file contents) |
-| `VPS_DEPLOY_PATH`    | Absolute path to the repo clone on the VPS, e.g. `/home/deploy/game-master-bell-api` |
-| `STAFF_PASSCODE`     | Same value described in step 1                                 |
-| `VAPID_PUBLIC_KEY`   | Same value described in step 1                                 |
-| `VAPID_PRIVATE_KEY`  | Same value described in step 1                                 |
-| `VAPID_SUBJECT`      | Same value described in step 1                                 |
-
-Only the env vars that don't already have a safe default in
-`docker-compose.yml` (`STAFF_PASSCODE`, `VAPID_PUBLIC_KEY`,
-`VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`) need to be secrets — everything else
-keeps the default baked into `docker-compose.yml`/`.env.example`. To
-override one of those defaults too (e.g. a non-default `TABLES_URL`), add
-it as another secret and an extra line in the `cat > .env` heredoc in
-`.github/workflows/deploy.yml`.
-
-Once the secrets are set, push to `main` (or run the workflow manually from
-the **Actions** tab) to trigger a deploy.
+If the VPS is too small for Docker's daemon overhead to be worth it (e.g.
+512MB RAM or less) run the API directly with Node + systemd instead — see
+[docs/DEPLOY_NATIVE.md](DEPLOY_NATIVE.md). Same reverse proxy config
+either way, since the app always listens on `127.0.0.1:3000`.
+`.github/workflows/deploy.yml` automates the native path.
 
 ## Next steps
 
