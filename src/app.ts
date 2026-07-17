@@ -1,3 +1,4 @@
+import cors from "@fastify/cors";
 import Fastify, { type FastifyInstance } from "fastify";
 import { CallRequestSchema } from "./call/schema.js";
 import type { PushSender } from "./push/service.js";
@@ -12,7 +13,10 @@ export interface BuildAppOptions {
   staffPasscode?: string;
   vapidPublicKey?: string;
   pushSender?: PushSender;
+  corsOrigins?: string[];
 }
+
+const defaultCorsOrigins = ["https://gatherloop.github.io"];
 
 const emptyTablesStore: TablesLookup = {
   findByCode: () => undefined,
@@ -34,8 +38,11 @@ export function buildApp({
   staffPasscode,
   vapidPublicKey,
   pushSender = noopPushSender,
+  corsOrigins = defaultCorsOrigins,
 }: BuildAppOptions = {}): FastifyInstance {
   const app = Fastify({ logger: true });
+
+  void app.register(cors, { origin: corsOrigins });
 
   app.get("/healthz", async () => {
     return { status: "ok" };
