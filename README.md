@@ -72,7 +72,11 @@ tables refresh after startup just keeps the last good copy.
 ## Deploying
 
 See [docs/DEPLOY.md](docs/DEPLOY.md) for running the API on the VPS via
-Docker Compose behind a TLS-terminating reverse proxy.
+Docker Compose behind a TLS-terminating reverse proxy, or
+[docs/DEPLOY_NATIVE.md](docs/DEPLOY_NATIVE.md) for running it directly
+under systemd on a lightweight VPS where Docker isn't worth the overhead.
+`.github/workflows/deploy.yml` automates the native path on every push to
+`main`.
 
 ## Operations
 
