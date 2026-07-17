@@ -39,9 +39,11 @@ jobs:
           script: |
             set -e
             export XDG_RUNTIME_DIR=/run/user/$(id -u)
-            export PATH="/usr/local/bin:/usr/bin:$PATH"
-            corepack enable
             cd ${{ secrets.VPS_DEPLOY_PATH }}
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm use
+            corepack enable
             git fetch origin main
             git reset --hard origin/main
             cat > .env <<'ENV_EOF'
