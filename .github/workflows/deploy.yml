@@ -39,6 +39,8 @@ jobs:
           script: |
             set -e
             export XDG_RUNTIME_DIR=/run/user/$(id -u)
+            export PATH="/usr/local/bin:/usr/bin:$PATH"
+            corepack enable
             cd ${{ secrets.VPS_DEPLOY_PATH }}
             git fetch origin main
             git reset --hard origin/main
