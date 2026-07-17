@@ -42,7 +42,7 @@ jobs:
             cd ${{ secrets.VPS_DEPLOY_PATH }}
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm use
+            nvm install
             corepack enable
             git fetch origin main
             git reset --hard origin/main
