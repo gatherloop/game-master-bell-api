@@ -104,12 +104,17 @@ systemctl --user restart game-master-bell-api
 push, then on `main` SSHes into the VPS and runs the same redeploy steps
 as above, plus (re)writes the VPS's `.env` from GitHub secrets on every
 deploy — rotating a secret and re-running the workflow is enough to roll
-it out.
+it out. It also (re)installs `deploy/game-master-bell-api.service` into
+`~/.config/systemd/user/` and runs `daemon-reload` on every deploy, so
+edits to the unit file in the repo take effect on the next push to `main`
+without any manual step on the VPS.
 
 ### One-time VPS prep
 
-1. Complete steps 1–3 above once by hand so there's a working service for
-   the workflow to update.
+1. Complete steps 1–2 above once by hand (clone the repo, configure
+   `.env`) so there's a working checkout for the workflow to update. The
+   workflow itself installs the systemd unit and starts the service on
+   its first run.
 2. Make sure lingering is enabled for the deploy user
    (`loginctl enable-linger <user>`) — without it, `systemctl --user`
    commands over a non-interactive SSH session have nothing to talk to.
