@@ -59,6 +59,7 @@ pnpm dev          # start the dev server with reload (http://localhost:3000)
 | `TABLES_CACHE_PATH`          | `./data/tables-cache.json`                                                             | On-disk fallback used if a fetch fails                                       |
 | `TABLES_REFRESH_INTERVAL_MS` | `3600000` (1 hour)                                                                     | How often to re-fetch `TABLES_URL`                                           |
 | `SUBSCRIPTIONS_DB_PATH`      | `./data/subscriptions.db`                                                              | SQLite file backing the subscriptions store                                  |
+| `CORS_ORIGINS`               | `https://gatherloop.github.io`                                                         | Comma-separated list of origins allowed to call this API via CORS            |
 | `STAFF_PASSCODE`             | _(required)_                                                                           | Shared secret gating `POST`/`DELETE /subscriptions`                          |
 | `VAPID_PUBLIC_KEY`           | _(required)_                                                                           | Served at `GET /vapid-key`; generate with `pnpm run vapid:generate`          |
 | `VAPID_PRIVATE_KEY`          | _(required)_                                                                           | Signs outgoing Web Push messages; generated alongside the public key         |

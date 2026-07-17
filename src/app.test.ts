@@ -47,6 +47,44 @@ function fakeSubscriptionStore(): SubscriptionStore {
   };
 }
 
+describe("CORS", () => {
+  it("allows a configured origin", async () => {
+    const app = buildApp({ corsOrigins: ["https://gatherloop.github.io"] });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/healthz",
+      headers: { origin: "https://gatherloop.github.io" },
+    });
+
+    expect(response.headers["access-control-allow-origin"]).toBe("https://gatherloop.github.io");
+  });
+
+  it("rejects an origin that is not configured", async () => {
+    const app = buildApp({ corsOrigins: ["https://gatherloop.github.io"] });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/healthz",
+      headers: { origin: "https://evil.example" },
+    });
+
+    expect(response.headers["access-control-allow-origin"]).toBeUndefined();
+  });
+
+  it("allows the default gatherloop.github.io origin out of the box", async () => {
+    const app = buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/healthz",
+      headers: { origin: "https://gatherloop.github.io" },
+    });
+
+    expect(response.headers["access-control-allow-origin"]).toBe("https://gatherloop.github.io");
+  });
+});
+
 describe("GET /healthz", () => {
   it("returns 200 with an ok status", async () => {
     const app = buildApp();

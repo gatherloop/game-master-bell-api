@@ -20,6 +20,9 @@ const tablesUrl =
 const tablesCachePath = process.env.TABLES_CACHE_PATH ?? "./data/tables-cache.json";
 const tablesRefreshIntervalMs = Number(process.env.TABLES_REFRESH_INTERVAL_MS ?? 60 * 60 * 1000);
 const subscriptionsDbPath = process.env.SUBSCRIPTIONS_DB_PATH ?? "./data/subscriptions.db";
+const corsOrigins = process.env.CORS_ORIGINS?.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const bootstrapLogger = pino();
 
@@ -50,6 +53,7 @@ async function main() {
     staffPasscode,
     vapidPublicKey,
     pushSender,
+    corsOrigins,
   });
 
   await app.listen({ port, host });

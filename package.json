@@ -21,6 +21,7 @@
     "vapid:generate": "tsx scripts/generate-vapid-keys.ts"
   },
   "dependencies": {
+    "@fastify/cors": "^11.3.0",
     "better-sqlite3": "^12.11.1",
     "fastify": "^5.6.1",
     "pino": "^10.3.1",
