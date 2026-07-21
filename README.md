@@ -1,5 +1,15 @@
 # game-master-bell-api
 
+> **⚠️ Archived — read-only.** This repo's code and deploy have moved to
+> [`apps/api` in `gatherloop/game-master-bell`](https://github.com/gatherloop/game-master-bell/tree/main/apps/api),
+> per [PRD-v3 phase 2](https://github.com/gatherloop/game-master-bell/blob/main/docs/PRD-v3.md#7-implementation-phases).
+> The monorepo's `deploy-api.yml` has been the sole deploy source to the VPS
+> since that migration was verified; this repo's own
+> `.github/workflows/deploy.yml` (kept until now as a rollback path) has
+> been removed. Everything below describes this repo as it stood before the
+> move — kept for history, not for active use. File issues and PRs against
+> the monorepo instead.
+
 Self-hosted call API for [Game Master Bell](https://github.com/gatherloop/game-master-bell),
 per [PRD-v2](https://github.com/gatherloop/game-master-bell/blob/main/docs/PRD-v2.md).
 It replaces the v1 Firebase Cloud Function: validates bell calls from the
